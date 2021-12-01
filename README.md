@@ -1,15 +1,3 @@
-<div id="top"></div>
-
-
-<!-- PROJECT LOGO -->
-<br />
-<div align="center">
-
-<h3 align="center">Bitcoin Risk Metric</h3>
-
-</div>
-
-
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
