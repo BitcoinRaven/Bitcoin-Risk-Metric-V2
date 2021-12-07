@@ -19,10 +19,10 @@ df.loc[df.index[-1]+1] = [date.today(), btcdata.iloc[-1]]
 df["Date"] = pd.to_datetime(df["Date"])
 
 ### Risk
-df['365'] = df['Value'].rolling(374).mean().dropna()
+df['365'] = df['Value'].rolling(374, min_periods=1).mean().dropna()
 df["avg"] = (np.log(df.Value) - np.log(df["365"])) * df.index**0.395
 df["avg"] = (df["avg"] - df["avg"].cummin()) / (df["avg"].cummax() - df["avg"].cummin())
-df = df[df.index > 1500]
+df = df[df.index > 1000]
 
 ########## Plot
 fig = make_subplots(specs=[[{"secondary_y": True}]])
