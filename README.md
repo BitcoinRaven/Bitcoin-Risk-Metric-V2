@@ -2,7 +2,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-This code is for bitcoin risk metric, the whole purpose form it is to help you DCA your investment according to bitcoin risk. Check youtube channel videos to understand more.
+This code is for bitcoin risk metric, the whole purpose of it is to help you DCA your investment according to bitcoin risk. Check youtube channel videos to understand more.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
