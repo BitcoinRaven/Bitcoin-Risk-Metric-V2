@@ -41,7 +41,7 @@ df = df[df.index > 1000]
 # Title for the plots
 AnnotationText = f"Updated: {btcdata.index[-1]} | Price: {round(df['Value'].iloc[-1])} | Risk: {round(df['avg'].iloc[-1], 2)}"
 
-# Plot BTC-USD and Risk on a logarithmic chart 
+# Plot BTC-USD and Risk on a logarithmic chart
 fig = make_subplots(specs=[[{'secondary_y': True}]])
 
 # Add BTC-USD and Risk data to the figure
