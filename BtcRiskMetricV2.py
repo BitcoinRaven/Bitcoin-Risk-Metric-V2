@@ -29,8 +29,7 @@ df['Date'] = pd.to_datetime(df['Date'])
 
 
 # Calculate the `Risk Metric`
-df['365'] = df['Value'].rolling(374, min_periods=1).mean().dropna()
-df['avg'] = (np.log(df.Value) - np.log(df['365'])) * df.index**0.395
+df['avg'] = (np.log(df.Value) - np.log( df['Value'].rolling(374, min_periods=1).mean().dropna() )) * df.index**.395
 
 # Normalization to 0-1 range
 df['avg'] = (df['avg'] - df['avg'].cummin()) / (df['avg'].cummax() - df['avg'].cummin())
@@ -45,6 +44,7 @@ AnnotationText = f"Updated: {btcdata.index[-1]} | Price: {round(df['Value'].iloc
 # Plot BTC-USD and Risk on a logarithmic chart 
 fig = make_subplots(specs=[[{'secondary_y': True}]])
 
+# Add BTC-USD and Risk data to the figure
 fig.add_trace(go.Scatter(x=df['Date'], y=df['Value'], name='Price', line=dict(color='gold')))
 fig.add_trace(go.Scatter(x=df['Date'], y=df['avg'],   name='Risk',  line=dict(color='white')), secondary_y=True)
 
