@@ -14,8 +14,8 @@ df.sort_values(by="Date", inplace=True)
 df = df[df["Value"] > 0]
 
 ### Last price
-btcdata = yf.download(tickers='BTC-USD', period="1d", interval="1m")["Close"]
-df.loc[df.index[-1]+1] = [date.today(), btcdata.iloc[-1]]
+btcdata = yf.download(tickers='BTC-USD', period="1d", interval="1m")
+df.loc[df.index[-1]+1] = [date.today(), btcdata["Close"].iloc[-1]]
 df["Date"] = pd.to_datetime(df["Date"])
 
 ### Risk
@@ -41,7 +41,7 @@ for i in range(6, 10):
     opacity += 0.1
     fig.add_hrect(y0=i*0.1, y1=((i+1)*0.1), line_width=0, fillcolor="red", opacity=opacity, secondary_y=True)
 
-AnnotationText = f"****Last BTC price: {round(df['Value'].iloc[-1])}**** Risk: {round(df['avg'].iloc[-1],2)}****"
+AnnotationText = f"Updated: {btcdata.index[-1]} | Price:{round(df['Value'].iloc[-1])} | Risk: {round(df['avg'].iloc[-1],2)}"
 
 fig.update_layout(template="plotly_dark")
 fig.update_xaxes(title="Date")
