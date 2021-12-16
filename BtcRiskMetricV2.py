@@ -62,7 +62,7 @@ for i in range(6, 10):
 
 fig.update_xaxes(title='Date')
 fig.update_yaxes(title='Price ($USD)', type='log', showgrid=False)
-fig.update_yaxes(title='Risk', type='linear', secondary_y=True, showgrid=True, tick0=0.0, dtick=0.1)
+fig.update_yaxes(title='Risk', type='linear', secondary_y=True, showgrid=True, tick0=0.0, dtick=0.1, range=[0, 1])
 fig.update_layout(template='plotly_dark', title={'text': AnnotationText, 'y': 0.9, 'x': 0.5})
 fig.show()
 
