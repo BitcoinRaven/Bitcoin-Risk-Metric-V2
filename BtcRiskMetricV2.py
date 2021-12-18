@@ -82,7 +82,7 @@ fig.show()
 
 # Plot Predicting BTC price according to specific risk
 fig = go.Figure(data=[go.Table(
-    header=dict(values=['Price', 'Risk'],
+    header=dict(values=['Risk', 'Price'],
                 line_color='darkslategray',
                 fill_color='lightskyblue',
                 align='left'),
