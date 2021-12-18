@@ -19,7 +19,6 @@ df.sort_values(by='Date', inplace=True)
 # Only include data points with existing price
 df = df[df['Value'] > 0]
 
-
 # Get the last price against USD
 btcdata = yf.download(tickers='BTC-USD', period='1d', interval='1m')
 
@@ -27,16 +26,25 @@ btcdata = yf.download(tickers='BTC-USD', period='1d', interval='1m')
 df.loc[df.index[-1]+1] = [date.today(), btcdata['Close'].iloc[-1]]
 df['Date'] = pd.to_datetime(df['Date'])
 
-
 # Calculate the `Risk Metric`
-df['avg'] = (np.log(df.Value) - np.log( df['Value'].rolling(374, min_periods=1).mean().dropna() )) * df.index**.395
+df["MA"] = df['Value'].rolling(374, min_periods=1).mean().dropna()
+df['Preavg'] = (np.log(df.Value) - np.log(df["MA"])) * df.index**.395
 
 # Normalization to 0-1 range
-df['avg'] = (df['avg'] - df['avg'].cummin()) / (df['avg'].cummax() - df['avg'].cummin())
+df['avg'] = (df['Preavg'] - df['Preavg'].cummin()) / (df['Preavg'].cummax() - df['Preavg'].cummin())
+
+# Predicting the price according to risk level
+pred_price = []
+pred_risk = []
+for risk in np.arange(0.0, 1.0, 0.1):
+    denorm_predi_risk = (risk * (df['Preavg'].cummax().iloc[-1] - df['Preavg'].cummin().iloc[-1])) + df['Preavg'].cummin().iloc[-1]
+    calculated_price = round(np.exp((denorm_predi_risk / df.index[-1]**.395) + np.log(df["MA"].iloc[-1])))
+    pred_price.append(calculated_price)
+    risk = round(risk, 1)
+    pred_risk.append(risk)
 
 # Exclude the first 1000 days from the dataframe, because it's pure chaos
 df = df[df.index > 1000]
-
 
 # Title for the plots
 AnnotationText = f"Updated: {btcdata.index[-1]} | Price: {round(df['Value'].iloc[-1])} | Risk: {round(df['avg'].iloc[-1], 2)}"
@@ -71,3 +79,19 @@ fig = px.scatter(df, x='Date', y='Value', color='avg', color_continuous_scale='j
 fig.update_yaxes(title='Price ($USD)', type='log', showgrid=False)
 fig.update_layout(template='plotly_dark', title={'text': AnnotationText, 'y': 0.9, 'x': 0.5})
 fig.show()
+
+# Plot Predicting BTC price according to specific risk
+fig = go.Figure(data=[go.Table(
+    header=dict(values=['Price', 'Risk'],
+                line_color='darkslategray',
+                fill_color='lightskyblue',
+                align='left'),
+    cells=dict(values=[pred_risk,
+                       pred_price],
+               line_color='darkslategray',
+               fill_color='lightcyan',
+               align='left'))
+])
+fig.update_layout(width=500, height=500, title={'text': "Price according to specific risk", 'y': 0.9, 'x': 0.5})
+fig.show()
+
