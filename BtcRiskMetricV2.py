@@ -34,14 +34,12 @@ df['Preavg'] = (np.log(df.Value) - np.log(df['MA'])) * df.index**.395
 df['avg'] = (df['Preavg'] - df['Preavg'].cummin()) / (df['Preavg'].cummax() - df['Preavg'].cummin())
 
 # Predicting the price according to risk level
-pred_price = []
-pred_risk = []
-for risk in np.arange(0.0, 1.0, 0.1):
-    denorm_predi_risk = (risk * (df['Preavg'].cummax().iloc[-1] - df['Preavg'].cummin().iloc[-1])) + df['Preavg'].cummin().iloc[-1]
-    calculated_price = round(np.exp((denorm_predi_risk / df.index[-1]**.395) + np.log(df['MA'].iloc[-1])))
-    pred_price.append(calculated_price)
-    risk = round(risk, 1)
-    pred_risk.append(risk)
+price_per_risk = {
+    round(risk, 1):round(np.exp(
+        (risk * (df['Preavg'].cummax().iloc[-1] - (cummin := df['Preavg'].cummin().iloc[-1])) + cummin) / df.index[-1]**.395 + np.log(df['MA'].iloc[-1])
+    ))
+    for risk in np.arange(0.0, 1.0, 0.1)
+}
 
 # Exclude the first 1000 days from the dataframe, because it's pure chaos
 df = df[df.index > 1000]
@@ -86,12 +84,10 @@ fig = go.Figure(data=[go.Table(
                 line_color='darkslategray',
                 fill_color='lightskyblue',
                 align='left'),
-    cells=dict(values=[pred_risk,
-                       pred_price],
+    cells=dict(values=[list(price_per_risk.keys()), list(price_per_risk.values())],
                line_color='darkslategray',
                fill_color='lightcyan',
                align='left'))
 ])
 fig.update_layout(width=500, height=500, title={'text': 'Price according to specific risk', 'y': 0.9, 'x': 0.5})
 fig.show()
-
