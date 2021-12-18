@@ -2,6 +2,7 @@
 
 ![BTC-USD scatter plot colored with Risk](images/risk-colored-price.png)
 ![BTC-USD with Risk Metric](images/linear-risk.png)
+![BTC Price Prediction According to Specific Risk](images/price_prediction.png)
 
 ## About the Project
 
