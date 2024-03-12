@@ -19,16 +19,38 @@ df.sort_values(by='Date', inplace=True)
 # Only include data points with existing price
 df = df[df['Value'] > 0]
 
-# Get the last price against USD
+# get data thats not in the quandl database
+new_data = yf.download(tickers='BTC-USD', start='2024-01-01', interval='1d')
+
+# restructure yf dataframe to match the quandl one
+new_data.reset_index(inplace=True)
+new_data.rename(columns={'Date': 'Date', 'Open': 'Value'}, inplace=True)
+new_data = new_data[['Date', 'Value']]
+
+# append yf dataframe to the quandl dataframe
+df = pd.concat([df, new_data], ignore_index=True)
+
+# remove duplicates and sort by date to prevent any issues
+df.drop_duplicates(subset='Date', keep='first', inplace=True)
+df.sort_values(by='Date', inplace=True)
+
+# # Get the last price against USD
 btcdata = yf.download(tickers='BTC-USD', period='1d', interval='1m')
 
 # Append the latest price data to the dataframe
 df.loc[df.index[-1]+1] = [date.today(), btcdata['Close'].iloc[-1]]
 df['Date'] = pd.to_datetime(df['Date'])
 
+diminishing_factor = 0.395
+moving_average_days = 365
+
 # Calculate the `Risk Metric`
-df['MA'] = df['Value'].rolling(374, min_periods=1).mean().dropna()
-df['Preavg'] = (np.log(df.Value) - np.log(df['MA'])) * df.index**.395
+    # calculate the x day moving average
+df['MA'] = df['Value'].rolling(moving_average_days, min_periods=1).mean().dropna()
+    # calculate log-return adjusted to diminishing returns over time
+    # this log-return is the relative price change from the moving average
+    # @note why **.395?, also, why use time as a diminishing factor? you could use the price itself or maybe the last ATH
+df['Preavg'] = (np.log(df.Value) - np.log(df['MA'])) * df.index**diminishing_factor
 
 # Normalization to 0-1 range
 df['avg'] = (df['Preavg'] - df['Preavg'].cummin()) / (df['Preavg'].cummax() - df['Preavg'].cummin())
@@ -36,13 +58,13 @@ df['avg'] = (df['Preavg'] - df['Preavg'].cummin()) / (df['Preavg'].cummax() - df
 # Predicting the price according to risk level
 price_per_risk = {
     round(risk, 1):round(np.exp(
-        (risk * (df['Preavg'].cummax().iloc[-1] - (cummin := df['Preavg'].cummin().iloc[-1])) + cummin) / df.index[-1]**.395 + np.log(df['MA'].iloc[-1])
+        (risk * (df['Preavg'].cummax().iloc[-1] - (cummin := df['Preavg'].cummin().iloc[-1])) + cummin) / df.index[-1]**diminishing_factor + np.log(df['MA'].iloc[-1])
     ))
     for risk in np.arange(0.0, 1.0, 0.1)
 }
 
-# Exclude the first 1000 days from the dataframe, because it's pure chaos
-df = df[df.index > 1000]
+# # Exclude the first 1000 days from the dataframe, because it's pure chaos
+# df = df[df.index > 1000]
 
 # Title for the plots
 AnnotationText = f"Updated: {btcdata.index[-1]} | Price: {round(df['Value'].iloc[-1])} | Risk: {round(df['avg'].iloc[-1], 2)}"
