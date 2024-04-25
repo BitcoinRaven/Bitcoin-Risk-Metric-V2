@@ -49,7 +49,6 @@ moving_average_days = 365
 df['MA'] = df['Value'].rolling(moving_average_days, min_periods=1).mean().dropna()
     # calculate log-return adjusted to diminishing returns over time
     # this log-return is the relative price change from the moving average
-    # @note why **.395?, also, why use time as a diminishing factor? you could use the price itself or maybe the last ATH
 df['Preavg'] = (np.log(df.Value) - np.log(df['MA'])) * df.index**diminishing_factor
 
 # Normalization to 0-1 range
